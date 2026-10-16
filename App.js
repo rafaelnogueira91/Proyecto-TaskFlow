@@ -1,48 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, SafeAreaView } from 'react-native';
-import AddTaskScreen from './src/screens/AddTaskScreen';
-import TaskDetailScreen from './src/screens/TaskDetailScreen';
-import EmptyState from './src/components/EmptyState';
-import colors from './src/constants/colors';
-
+import React from 'react';
+import AppNavigator from './src/navigation/AppNavigator';
+import { TasksProvider } from './src/context/TasksContext';
 export default function App() {
-  const [tasks, setTasks] = useState([]);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-
-  const handleAddTask = (task) => {
-    setTasks(current => [{ ...task, id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, completed: false }, ...current]);
-    // Permanece en el formulario para que se vea la confirmación de guardado.
-    // El botón Volver permite revisar la nueva tarea en la lista.
-  };
-  const toggleCompleted = (id) => setTasks(current => current.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
-  const deleteTask = (id) => setTasks(current => current.filter(task => task.id !== id));
-
-  if (selectedTask) {
-    const currentTask = tasks.find(task => task.id === selectedTask.id) || selectedTask;
-    return <TaskDetailScreen task={currentTask} onBack={() => setSelectedTask(null)} />;
-  }
-  if (showForm) return <AddTaskScreen onAddTask={handleAddTask} onBack={() => setShowForm(false)} />;
-
-  return <SafeAreaView style={styles.container}>
-    <View style={styles.header}><Text style={styles.heading}>Mis tareas</Text>
-      <TouchableOpacity style={styles.addButton} onPress={() => setShowForm(true)} accessibilityRole="button"><Text style={styles.addText}>+ Nueva tarea</Text></TouchableOpacity>
-    </View>
-    <FlatList data={tasks} keyExtractor={item => item.id} contentContainerStyle={styles.list}
-      ListEmptyComponent={<EmptyState />}
-      renderItem={({ item }) => <View style={styles.card}>
-        <TouchableOpacity style={styles.cardContent} onPress={() => setSelectedTask(item)} accessibilityRole="button">
-          <Text style={[styles.taskTitle,item.completed && styles.done]}>{item.title}</Text>
-          <Text style={styles.subtitle}>{item.category} · {item.completed ? 'Completada' : 'Pendiente'}</Text>
-          <Text numberOfLines={2} style={styles.description}>{item.description}</Text>
-          <Text style={styles.detailHint}>Ver detalle →</Text>
-        </TouchableOpacity>
-        <View style={styles.actions}>
-          <TouchableOpacity onPress={() => toggleCompleted(item.id)} accessibilityRole="button" style={styles.action}><Text style={styles.actionText}>{item.completed ? 'Marcar pendiente' : 'Completar'}</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => deleteTask(item.id)} accessibilityRole="button" style={styles.action}><Text style={styles.deleteText}>Eliminar</Text></TouchableOpacity>
-        </View>
-      </View>}
-    />
-  </SafeAreaView>;
+ return <TasksProvider><AppNavigator /></TasksProvider>;
 }
-const styles=StyleSheet.create({container:{flex:1,backgroundColor:colors.background},header:{paddingHorizontal:22,paddingTop:35,paddingBottom:12},heading:{fontSize:28,fontWeight:'bold',color:colors.primary,marginBottom:16},addButton:{backgroundColor:colors.primary,padding:15,borderRadius:10,alignItems:'center'},addText:{color:colors.white,fontWeight:'700',fontSize:16},list:{padding:20,flexGrow:1},card:{backgroundColor:colors.white,borderRadius:14,marginBottom:14,padding:16},cardContent:{paddingBottom:10},taskTitle:{fontSize:18,fontWeight:'700',color:colors.text},done:{textDecorationLine:'line-through',opacity:0.6},subtitle:{color:colors.primary,marginTop:6},description:{color:colors.text,marginTop:8},detailHint:{color:colors.primary,marginTop:12,fontWeight:'600'},actions:{flexDirection:'row',gap:16,borderTopWidth:1,borderTopColor:'#e5e7eb',paddingTop:12},action:{paddingVertical:4},actionText:{color:colors.primary,fontWeight:'600'},deleteText:{color:colors.error,fontWeight:'600'}});

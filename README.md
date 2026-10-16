@@ -87,7 +87,7 @@ El proyecto integra las funcionalidades correspondientes a los Checkpoints 3 y 4
 
 Las tareas se gestionan mediante estado local de React, sin persistencia permanente en una base de datos.
 
-La implementación de React Navigation, Redux y Firebase se realizará en los módulos posteriores.
+React Navigation se integra en el Checkpoint 5. Redux y Firebase quedan para los próximos módulos.
 
 ## Tecnologías utilizadas
 
@@ -101,3 +101,35 @@ La implementación de React Navigation, Redux y Firebase se realizará en los m�
 ## Repositorio
 
 https://github.com/rafaelnogueira91/Proyecto-TaskFlow
+## Checkpoint 5: Navegación anidada con React Navigation
+
+La aplicación utiliza `NavigationContainer` como raíz. El `BottomTabNavigator` contiene dos pestañas: `Home` y `Profile`. Dentro de `Home` hay un `NativeStackNavigator` con las rutas `TaskList` (inicial), `TaskDetail` y `TaskForm`.
+
+- **Lista → Detalle:** al pulsar una tarea en `FlatList`, se ejecuta `navigation.navigate('TaskDetail', { taskId: item.id })`. El detalle recupera el ID con `useRoute().params` y consulta los datos de la tarea.
+- **Lista → Formulario:** el botón «Nueva tarea» navega a `TaskForm`.
+- **Formulario → Lista:** al validar y guardar, se agrega la tarea al estado local y se ejecuta `navigation.navigate('TaskList')`.
+- **Atrás:** el encabezado nativo del Stack permite volver a la lista.
+- **Estado:** `TasksContext` mantiene temporalmente las tareas mientras la app está abierta; no se utiliza Redux ni Firebase todavía.
+
+### Estructura de navegación
+
+```text
+App → TasksProvider → NavigationContainer
+                          └─ Bottom Tabs
+                             ├─ Home → Native Stack
+                             │          ├─ TaskList
+                             │          ├─ TaskDetail
+                             │          └─ TaskForm
+                             └─ Profile → ProfileScreen
+```
+
+### Comprobación manual
+
+1. Abrir Inicio y comprobar el mensaje de lista vacía.
+2. Pulsar «Nueva tarea», completar campos válidos y guardar; debe volver a Inicio.
+3. Pulsar la tarea creada; comprobar el ID, título y demás datos en Detalle.
+4. Usar la flecha del encabezado para regresar.
+5. Cambiar a Perfil y volver a Inicio; la tarea debe seguir visible.
+6. Marcar una tarea como completada y comprobar su estado en el detalle.
+
+Las capturas de pantalla son opcionales y pueden añadirse después de verificar la app en Expo Go o en el navegador.
