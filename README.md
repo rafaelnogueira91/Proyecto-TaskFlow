@@ -2,12 +2,13 @@
 
 TaskFlow es una aplicación móvil desarrollada con **React Native y Expo**, orientada a la creación, organización y seguimiento de tareas.
 
-El proyecto se desarrolla progresivamente mediante checkpoints, incorporando componentes reutilizables, formularios controlados, listas interactivas y pantallas de detalle.
+El proyecto se desarrolla progresivamente mediante checkpoints, incorporando componentes reutilizables, formularios controlados, listas interactivas y navegación anidada entre pantallas.
 
 ## Estructura del proyecto
 
 - `src/components`: componentes reutilizables de la interfaz.
 - `src/screens`: pantallas principales de la aplicación.
+- `src/navigation`: configuración de navegación con React Navigation.
 - `src/assets`: imágenes y recursos locales.
 - `src/constants`: colores y constantes de diseño.
 
@@ -15,7 +16,7 @@ El proyecto se desarrolla progresivamente mediante checkpoints, incorporando com
 
 - `HomeScreen`: visualización y gestión de tareas mediante FlatList.
 - `AddTaskScreen`: formulario funcional para crear tareas.
-- `TaskDetailScreen`: visualización de la información detallada de una tarea.
+- `TaskDetailScreen`: visualización de información detallada de una tarea.
 - `ProfileScreen`: pantalla de perfil del usuario.
 
 ## Componentes implementados
@@ -25,17 +26,16 @@ El proyecto se desarrolla progresivamente mediante checkpoints, incorporando com
 
 ## Checkpoint 3: Formulario funcional
 
-El formulario de creación de tareas permite:
+Se implementó un formulario que permite:
 
 - Ingresar título, descripción y categoría.
 - Controlar los campos mediante `useState`.
 - Validar títulos de mínimo 5 caracteres.
 - Validar descripciones de mínimo 10 caracteres.
-- Mostrar mensajes de error en rojo.
-- Seleccionar categorías con Personal como valor inicial.
-- Registrar el objeto de la tarea en consola.
-- Mostrar una confirmación de guardado.
-- Limpiar automáticamente los campos después de guardar correctamente.
+- Mostrar mensajes de error.
+- Seleccionar categorías Personal, Trabajo y Estudio.
+- Confirmar el guardado de una tarea.
+- Limpiar los campos después de guardar correctamente.
 
 ## Checkpoint 4: Lista de tareas con detalle
 
@@ -46,48 +46,86 @@ Se incorporaron las siguientes funcionalidades:
 - Incorporación de nuevas tareas a la lista.
 - Selección de tareas mediante interacción táctil.
 - Visualización de título, descripción, categoría, fecha y estado.
-- Botón para regresar desde el detalle a la lista.
 - Actualización del estado de tareas completadas.
-- Manejo del estado local mediante `useState`.
-- Navegación simulada sin React Navigation.
+- Eliminación de tareas.
+- Manejo del estado local mediante React Hooks.
 
-## Ejecución local
+En este checkpoint se utilizó navegación simulada, posteriormente reemplazada por React Navigation.
 
-1. Instalar las dependencias:
+## Checkpoint 5: Navegación anidada con React Navigation
 
-   `npm install`
+Se implementó una arquitectura de navegación anidada utilizando React Navigation.
 
-2. Iniciar Expo:
+### Navegación principal
 
-   `npx expo start`
+La aplicación utiliza `NavigationContainer` y un `BottomTabNavigator` con dos pestañas:
 
-3. Abrir la aplicación mediante Expo Go, un emulador compatible o el navegador web.
+- **Inicio:** permite visualizar y administrar tareas.
+- **Perfil:** muestra la información del usuario.
+
+### Navegación de tareas
+
+Dentro de Inicio se implementó un `NativeStackNavigator` con tres rutas:
+
+- `TaskList`: lista principal de tareas.
+- `TaskDetail`: información detallada de una tarea.
+- `TaskForm`: formulario de creación de tareas.
+
+### Funcionalidades implementadas
+
+- Navegación desde la lista hacia el detalle de una tarea.
+- Paso del ID mediante `navigation.navigate()` y `route.params`.
+- Visualización de los datos correspondientes a la tarea seleccionada.
+- Navegación desde la lista hacia el formulario.
+- Redirección automática a la lista después de guardar.
+- Regreso mediante el encabezado nativo.
+- Navegación entre Inicio y Perfil mediante pestañas inferiores.
+- Conservación temporal de las tareas utilizando Context API.
+
+### Estructura de navegación
+
+```text
+App
+ └── TasksProvider
+      └── NavigationContainer
+           └── BottomTabNavigator
+                ├── Home
+                │    └── NativeStackNavigator
+                │         ├── TaskList
+                │         ├── TaskDetail
+                │         └── TaskForm
+                └── Profile
+                     └── ProfileScreen
+```
 
 ## Pruebas y validaciones
 
-En el Checkpoint 3 se verificaron:
+Se realizaron pruebas manuales en el navegador mediante Expo.
 
-- Visualización del formulario.
-- Validaciones de título y descripción.
-- Mensajes de error.
-- Confirmación de guardado en navegador.
-- Limpieza de los campos después de guardar.
-
-Para el Checkpoint 4 se deben comprobar:
+Se comprobó:
 
 - Visualización del estado vacío.
-- Creación y visualización de tareas en la lista.
-- Acceso al detalle de una tarea.
-- Funcionamiento del botón Volver.
-- Actualización de tareas completadas.
+- Acceso al formulario de creación.
+- Creación y visualización de una nueva tarea.
+- Redirección automática a la lista después de guardar.
+- Navegación hacia el detalle.
+- Visualización del ID, título, descripción, categoría, fecha y estado.
+- Regreso desde el detalle hacia la lista.
+- Funcionamiento de las pestañas Inicio y Perfil.
+- Conservación de la tarea al cambiar entre pestañas.
 
-## Estado actual
+## Ejecución local
 
-El proyecto integra las funcionalidades correspondientes a los Checkpoints 3 y 4.
+1. Clonar el repositorio.
+2. Instalar las dependencias:
 
-Las tareas se gestionan mediante estado local de React, sin persistencia permanente en una base de datos.
+   `npm install`
 
-React Navigation se integra en el Checkpoint 5. Redux y Firebase quedan para los próximos módulos.
+3. Iniciar Expo:
+
+   `npx expo start`
+
+4. Abrir la aplicación mediante Expo Go, un emulador compatible o el navegador web.
 
 ## Tecnologías utilizadas
 
@@ -95,41 +133,23 @@ React Navigation se integra en el Checkpoint 5. Redux y Firebase quedan para los
 - Expo
 - JavaScript
 - React Hooks (`useState`)
+- Context API
 - FlatList
 - StyleSheet
+- React Navigation
+- Native Stack Navigator
+- Bottom Tab Navigator
+
+## Estado actual
+
+El proyecto integra las funcionalidades correspondientes a los **Checkpoints 3, 4 y 5**.
+
+La aplicación permite crear, visualizar, completar y eliminar tareas, consultar sus detalles y navegar entre las pantallas mediante una arquitectura anidada.
+
+Las tareas se mantienen temporalmente durante la ejecución de la aplicación, sin persistencia permanente.
+
+En los próximos módulos se incorporarán Redux Toolkit y Firebase para la gestión global y persistencia de datos.
 
 ## Repositorio
 
 https://github.com/rafaelnogueira91/Proyecto-TaskFlow
-## Checkpoint 5: Navegación anidada con React Navigation
-
-La aplicación utiliza `NavigationContainer` como raíz. El `BottomTabNavigator` contiene dos pestañas: `Home` y `Profile`. Dentro de `Home` hay un `NativeStackNavigator` con las rutas `TaskList` (inicial), `TaskDetail` y `TaskForm`.
-
-- **Lista → Detalle:** al pulsar una tarea en `FlatList`, se ejecuta `navigation.navigate('TaskDetail', { taskId: item.id })`. El detalle recupera el ID con `useRoute().params` y consulta los datos de la tarea.
-- **Lista → Formulario:** el botón «Nueva tarea» navega a `TaskForm`.
-- **Formulario → Lista:** al validar y guardar, se agrega la tarea al estado local y se ejecuta `navigation.navigate('TaskList')`.
-- **Atrás:** el encabezado nativo del Stack permite volver a la lista.
-- **Estado:** `TasksContext` mantiene temporalmente las tareas mientras la app está abierta; no se utiliza Redux ni Firebase todavía.
-
-### Estructura de navegación
-
-```text
-App → TasksProvider → NavigationContainer
-                          └─ Bottom Tabs
-                             ├─ Home → Native Stack
-                             │          ├─ TaskList
-                             │          ├─ TaskDetail
-                             │          └─ TaskForm
-                             └─ Profile → ProfileScreen
-```
-
-### Comprobación manual
-
-1. Abrir Inicio y comprobar el mensaje de lista vacía.
-2. Pulsar «Nueva tarea», completar campos válidos y guardar; debe volver a Inicio.
-3. Pulsar la tarea creada; comprobar el ID, título y demás datos en Detalle.
-4. Usar la flecha del encabezado para regresar.
-5. Cambiar a Perfil y volver a Inicio; la tarea debe seguir visible.
-6. Marcar una tarea como completada y comprobar su estado en el detalle.
-
-Las capturas de pantalla son opcionales y pueden añadirse después de verificar la app en Expo Go o en el navegador.
