@@ -1,30 +1,46 @@
-# TaskFlow
+# TaskFlow – Checkpoint Módulo 6
 
-TaskFlow es una aplicación móvil desarrollada con **React Native y Expo**, orientada a la creación, organización y seguimiento de tareas.
+Aplicación React Native + Expo, ampliada desde el Módulo 5.
 
 El proyecto se desarrolla progresivamente mediante checkpoints, incorporando componentes reutilizables, formularios controlados, listas interactivas y navegación anidada entre pantallas.
+## Instalación
 
-## Estructura del proyecto
+1. Instala Node.js.
+2. Abre una terminal en la carpeta del proyecto.
+3. Ejecuta `npm install`.
+4. Ejecuta `npx expo start` y abre Expo Go o el navegador (`w`).
 
 - `src/components`: componentes reutilizables de la interfaz.
 - `src/screens`: pantallas principales de la aplicación.
 - `src/navigation`: configuración de navegación con React Navigation.
 - `src/assets`: imágenes y recursos locales.
 - `src/constants`: colores y constantes de diseño.
+## Funcionalidades
 
-## Pantallas implementadas
+- Diseño original del Módulo 5 y validaciones de título (5 caracteres) y descripción (10 caracteres).
+- Crear, visualizar, completar/descompletar desde la lista o el detalle y eliminar tareas.
+- Filtros combinables por estado y categoría.
+- Estado global centralizado con Redux Toolkit (`src/store/store.js` y `src/store/taskSlice.js`).
+- `useSelector` y `useDispatch` sincronizan la lista y el detalle de tareas.
+- Acciones `addTask`, `toggleTaskStatus`, `deleteTask`, `setFilter` y filtro adicional de categoría.
+- Los filtros se conservan al navegar entre pestañas durante la sesión.
+- Navegación Stack + Bottom Tabs para Tareas y Perfil.
 
 - `HomeScreen`: visualización y gestión de tareas mediante FlatList.
 - `AddTaskScreen`: formulario funcional para crear tareas.
 - `TaskDetailScreen`: visualización de información detallada de una tarea.
 - `ProfileScreen`: pantalla de perfil del usuario.
+## Estructura
 
-## Componentes implementados
+- `App.js`: Provider y navegadores.
+- `src/store/`: store, slice, acciones y selectores.
+- `src/screens/`: pantallas.
+- `src/components/`: componentes reutilizables.
+- `src/constants/colors.js`: colores originales.
 
-- `ProfileCard`: componente reutilizable que recibe información mediante props.
-- `EmptyState`: componente que informa cuando no existen tareas registradas.
+**Nota:** el estado Redux se mantiene durante la sesión; no hay persistencia después de cerrar la aplicación. Esta entrega no incluye backend.
 
-## Checkpoint 3: Formulario funcional
+## GitHub
 
 Se implementó un formulario que permite:
 
@@ -153,3 +169,4 @@ En los próximos módulos se incorporarán Redux Toolkit y Firebase para la gest
 ## Repositorio
 
 https://github.com/rafaelnogueira91/Proyecto-TaskFlow
+El archivo `.gitignore` excluye `node_modules` y `.expo`. Sube los archivos fuente, `package.json`, el archivo de bloqueo que genere `npm install` y este README.

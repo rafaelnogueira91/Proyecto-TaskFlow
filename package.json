@@ -1,5 +1,5 @@
 {
-  "name": "taskflow-app-blank",
+  "name": "taskflow-modulo-6",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
@@ -9,12 +9,13 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-web": "^0.21.2",
-    "@react-navigation/native": "^7.1.0",
+    "@reduxjs/toolkit": "^2.9.2",
+    "react-redux": "^9.2.0",
+    "@react-navigation/native": "^7.1.21",
+    "@react-navigation/native-stack": "^7.6.4",
     "@react-navigation/bottom-tabs": "^7.4.0",
-    "@react-navigation/native-stack": "^7.3.0",
-    "@expo/vector-icons": "^15.0.0",
     "react-native-screens": "~4.23.0",
-    "react-native-safe-area-context": "~5.6.0"
+    "react-native-safe-area-context": "~5.6.2"
   },
   "scripts": {
     "start": "expo start",

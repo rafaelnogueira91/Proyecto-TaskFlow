@@ -13,12 +13,11 @@ import {
 } from 'react-native';
 
 import colors from '../constants/colors';
-import { useNavigation } from '@react-navigation/native';
-import { useTasks } from '../context/TasksContext';
+import { useDispatch } from 'react-redux';
+import { addTask } from '../store/taskSlice';
 
-export default function AddTaskScreen() {
-  const navigation = useNavigation();
-  const { addTask } = useTasks();
+export default function AddTaskScreen({ navigation }) {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Personal');
@@ -57,7 +56,7 @@ export default function AddTaskScreen() {
     };
 
     console.log('Tarea creada:', task);
-    addTask(task);
+    dispatch(addTask(task));
 
     // Limpia primero: en web Alert.alert no siempre está implementado.
     setTitle('');
@@ -67,7 +66,11 @@ export default function AddTaskScreen() {
     setFocused('');
     setSubmitted(false);
 
-    navigation.navigate('TaskList');
+    if (Platform.OS === 'web') {
+      window.alert('Éxito: Tarea guardada en Redux');
+    } else {
+      Alert.alert('Éxito', 'Tarea guardada en Redux');
+    }
   };
 
   // Al corregir un campo, elimina su error solo cuando ya es válido.
@@ -98,7 +101,7 @@ export default function AddTaskScreen() {
     >
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.heading}>Nueva tarea</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('TaskList')} accessibilityRole="button"><Text style={{ color: colors.primary, marginBottom: 12 }}>← Volver a mis tareas</Text></TouchableOpacity>
+        {<TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button"><Text style={{ color: colors.primary, marginBottom: 12 }}>← Volver a mis tareas</Text></TouchableOpacity>}
 
         <Text style={styles.label}>Título</Text>
         <TextInput
