@@ -1,172 +1,93 @@
-# TaskFlow – Checkpoint Módulo 6
+# TaskFlow — Módulo 7 | Autenticación y Persistencia
 
-Aplicación React Native + Expo, ampliada desde el Módulo 5.
+**Coderhouse · Checkpoint: Autenticación y Persistencia**
 
-El proyecto se desarrolla progresivamente mediante checkpoints, incorporando componentes reutilizables, formularios controlados, listas interactivas y navegación anidada entre pantallas.
-## Instalación
+TaskFlow es una aplicación de gestión de tareas creada con **React Native y Expo**. Usa **Firebase Authentication** para registrar usuarios e iniciar sesión, **Cloud Firestore** para conservar las tareas y **Redux Toolkit** para mantener sincronizada la interfaz.
 
-1. Instala Node.js.
-2. Abre una terminal en la carpeta del proyecto.
-3. Ejecuta `npm install`.
-4. Ejecuta `npx expo start` y abre Expo Go o el navegador (`w`).
+Repositorio del proyecto: https://github.com/rafaelnogueira91/Proyecto-TaskFlow
 
-- `src/components`: componentes reutilizables de la interfaz.
-- `src/screens`: pantallas principales de la aplicación.
-- `src/navigation`: configuración de navegación con React Navigation.
-- `src/assets`: imágenes y recursos locales.
-- `src/constants`: colores y constantes de diseño.
-## Funcionalidades
+## Tecnologías
 
-- Diseño original del Módulo 5 y validaciones de título (5 caracteres) y descripción (10 caracteres).
-- Crear, visualizar, completar/descompletar desde la lista o el detalle y eliminar tareas.
-- Filtros combinables por estado y categoría.
-- Estado global centralizado con Redux Toolkit (`src/store/store.js` y `src/store/taskSlice.js`).
-- `useSelector` y `useDispatch` sincronizan la lista y el detalle de tareas.
-- Acciones `addTask`, `toggleTaskStatus`, `deleteTask`, `setFilter` y filtro adicional de categoría.
-- Los filtros se conservan al navegar entre pestañas durante la sesión.
-- Navegación Stack + Bottom Tabs para Tareas y Perfil.
+- React Native + Expo (web y dispositivos compatibles)
+- React Navigation: Stack Navigator y Bottom Tabs
+- Redux Toolkit + React Redux
+- Firebase Authentication (correo y contraseña)
+- Cloud Firestore
 
-- `HomeScreen`: visualización y gestión de tareas mediante FlatList.
-- `AddTaskScreen`: formulario funcional para crear tareas.
-- `TaskDetailScreen`: visualización de información detallada de una tarea.
-- `ProfileScreen`: pantalla de perfil del usuario.
-## Estructura
+## Instalación y ejecución
 
-- `App.js`: Provider y navegadores.
-- `src/store/`: store, slice, acciones y selectores.
-- `src/screens/`: pantallas.
-- `src/components/`: componentes reutilizables.
-- `src/constants/colors.js`: colores originales.
+1. Instalar **Node.js** y descargar o clonar este proyecto.
+2. Abrir una terminal en la carpeta que contiene `package.json`.
+3. Ejecutar `npm install`.
+4. Ejecutar `npx expo start --web` para probar en navegador, o `npx expo start` para seleccionar un destino compatible.
+5. Tener habilitados en el proyecto Firebase **Authentication > Sign-in method > Email/Password** y **Firestore Database**, con reglas de acceso por usuario.
 
-**Nota:** el estado Redux se mantiene durante la sesión; no hay persistencia después de cerrar la aplicación. Esta entrega no incluye backend.
+> La configuración de Firebase está en `src/services/firebaseConfig.js`. Para utilizar otro proyecto Firebase, se deben reemplazar sus datos de configuración y configurar sus servicios y reglas. No subir cuentas de servicio ni credenciales administrativas al repositorio.
 
-## GitHub
+## Funcionalidades del Módulo 7
 
-Se implementó un formulario que permite:
+### Autenticación y navegación protegida
 
-- Ingresar título, descripción y categoría.
-- Controlar los campos mediante `useState`.
-- Validar títulos de mínimo 5 caracteres.
-- Validar descripciones de mínimo 10 caracteres.
-- Mostrar mensajes de error.
-- Seleccionar categorías Personal, Trabajo y Estudio.
-- Confirmar el guardado de una tarea.
-- Limpiar los campos después de guardar correctamente.
+- `LoginScreen.js`: inicio de sesión mediante `signInWithEmailAndPassword`, validaciones y mensajes de error.
+- `RegisterScreen.js`: registro mediante `createUserWithEmailAndPassword`.
+- `App.js`: escucha `onAuthStateChanged`, muestra un indicador de carga mientras determina la sesión y alterna entre rutas públicas (`Login`, `Registro`) y privadas (`Inicio`, `AgregarTarea`, `DetalleTarea`).
+- `ProfileScreen.js`: muestra información de la cuenta y permite cerrar sesión.
 
-## Checkpoint 4: Lista de tareas con detalle
+### Tareas persistidas en Firestore
 
-Se incorporaron las siguientes funcionalidades:
+- Colección: **`tasks`**.
+- Cada documento de tarea contiene `userId`, `title`, `description`, `category`, `completed` y `createdAt`.
+- **Crear:** `addDoc` guarda una tarea vinculada al `uid` autenticado.
+- **Leer:** `getDocs` y `where('userId', '==', uid)` consultan las tareas del usuario.
+- **Actualizar:** `updateDoc` cambia el estado completada/pendiente.
+- **Eliminar:** `deleteDoc` elimina el documento correspondiente.
+- `taskSlice.js` implementa estas operaciones con `createAsyncThunk`, almacena los resultados en Redux y ofrece selectores para lista, detalle, filtros y contadores.
+- Se muestra un estado de carga y un mensaje de error con opción de reintentar la consulta cuando corresponde.
 
-- Visualización de tareas mediante `FlatList`.
-- Mensaje de estado vacío cuando no existen tareas.
-- Incorporación de nuevas tareas a la lista.
-- Selección de tareas mediante interacción táctil.
-- Visualización de título, descripción, categoría, fecha y estado.
-- Actualización del estado de tareas completadas.
-- Eliminación de tareas.
-- Manejo del estado local mediante React Hooks.
+**Sincronización:** la aplicación utiliza lectura al ingresar a la pantalla y después de operaciones de escritura; **no utiliza un listener `onSnapshot` en tiempo real**. Este enfoque está permitido por el enunciado del checkpoint.
 
-En este checkpoint se utilizó navegación simulada, posteriormente reemplazada por React Navigation.
-
-## Checkpoint 5: Navegación anidada con React Navigation
-
-Se implementó una arquitectura de navegación anidada utilizando React Navigation.
-
-### Navegación principal
-
-La aplicación utiliza `NavigationContainer` y un `BottomTabNavigator` con dos pestañas:
-
-- **Inicio:** permite visualizar y administrar tareas.
-- **Perfil:** muestra la información del usuario.
-
-### Navegación de tareas
-
-Dentro de Inicio se implementó un `NativeStackNavigator` con tres rutas:
-
-- `TaskList`: lista principal de tareas.
-- `TaskDetail`: información detallada de una tarea.
-- `TaskForm`: formulario de creación de tareas.
-
-### Funcionalidades implementadas
-
-- Navegación desde la lista hacia el detalle de una tarea.
-- Paso del ID mediante `navigation.navigate()` y `route.params`.
-- Visualización de los datos correspondientes a la tarea seleccionada.
-- Navegación desde la lista hacia el formulario.
-- Redirección automática a la lista después de guardar.
-- Regreso mediante el encabezado nativo.
-- Navegación entre Inicio y Perfil mediante pestañas inferiores.
-- Conservación temporal de las tareas utilizando Context API.
-
-### Estructura de navegación
+## Organización principal
 
 ```text
-App
- └── TasksProvider
-      └── NavigationContainer
-           └── BottomTabNavigator
-                ├── Home
-                │    └── NativeStackNavigator
-                │         ├── TaskList
-                │         ├── TaskDetail
-                │         └── TaskForm
-                └── Profile
-                     └── ProfileScreen
+App.js
+src/
+  components/         Componentes reutilizables
+  constants/          Colores de interfaz
+  screens/            Login, registro, tareas, detalle y perfil
+  services/
+    firebaseConfig.js Configuración y exportación de auth y db
+  store/
+    store.js          Configuración de Redux
+    taskSlice.js      Operaciones Firestore, reducers y selectores
 ```
 
-## Pruebas y validaciones
+## Cómo probar el checkpoint
 
-Se realizaron pruebas manuales en el navegador mediante Expo.
+Las siguientes son **instrucciones de prueba manual**, no un registro de pruebas automatizadas. Marca los resultados una vez ejecutados en tu entorno y en la consola Firebase.
 
-Se comprobó:
+| Prueba | Pasos | Resultado esperado |
+|---|---|---|
+| Registro | Cerrar sesión, entrar a Registro y crear una cuenta nueva | Firebase crea la cuenta y se muestra el flujo privado |
+| Inicio de sesión | Cerrar sesión e ingresar con credenciales válidas | Se abre Inicio / Mis tareas |
+| Error de autenticación | Intentar ingresar con contraseña incorrecta | Se presenta un mensaje claro, sin cerrar la app |
+| Sesión persistente | Iniciar sesión, cerrar y volver a abrir la app en el mismo entorno | Se recupera la sesión si el entorno conserva el almacenamiento de Firebase |
+| Crear tarea | Crear una tarea válida | Aparece en la lista y en Firebase Console > Firestore Database > `tasks` |
+| Completar tarea | Cambiar el estado de una tarea | Cambia en la interfaz y en el documento de Firestore |
+| Eliminar tarea | Eliminar una tarea | Desaparece de la lista y de Firestore |
+| Aislamiento de usuarios | Crear tarea con cuenta A, cerrar sesión e ingresar con cuenta B | B no ve las tareas de A |
+| Persistencia de datos | Crear una tarea, cerrar sesión y volver a ingresar con la misma cuenta | La tarea vuelve a cargarse desde Firestore |
+| Fallo de red | Desconectar la red e intentar consultar o guardar | Se informa el error sin que la app se cierre |
 
-- Visualización del estado vacío.
-- Acceso al formulario de creación.
-- Creación y visualización de una nueva tarea.
-- Redirección automática a la lista después de guardar.
-- Navegación hacia el detalle.
-- Visualización del ID, título, descripción, categoría, fecha y estado.
-- Regreso desde el detalle hacia la lista.
-- Funcionamiento de las pestañas Inicio y Perfil.
-- Conservación de la tarea al cambiar entre pestañas.
+### Evidencias recomendadas para la entrega
 
-## Ejecución local
+Capturas del registro/login, de la lista de tareas, del documento creado en la colección `tasks` (mostrando `userId`) y de la prueba con dos cuentas. **No incluir contraseñas ni tokens** en capturas.
 
-1. Clonar el repositorio.
-2. Instalar las dependencias:
+## Seguridad de Firestore
 
-   `npm install`
+Filtrar por `userId` en el cliente **no sustituye las reglas de seguridad**. La consola Firebase debe tener reglas que permitan a cada usuario leer y escribir solo sus propios documentos. El archivo `firestore.rules.example` incluye un ejemplo para revisar y adaptar en Firebase Console > Firestore Database > Rules.
 
-3. Iniciar Expo:
+**Importante:** el archivo de ejemplo no aplica reglas automáticamente ni prueba que las reglas de producción estén activas. Deben revisarse y publicarse en Firebase.
 
-   `npx expo start`
+## Alcance y próximo paso
 
-4. Abrir la aplicación mediante Expo Go, un emulador compatible o el navegador web.
-
-## Tecnologías utilizadas
-
-- React Native
-- Expo
-- JavaScript
-- React Hooks (`useState`)
-- Context API
-- FlatList
-- StyleSheet
-- React Navigation
-- Native Stack Navigator
-- Bottom Tab Navigator
-
-## Estado actual
-
-El proyecto integra las funcionalidades correspondientes a los **Checkpoints 3, 4 y 5**.
-
-La aplicación permite crear, visualizar, completar y eliminar tareas, consultar sus detalles y navegar entre las pantallas mediante una arquitectura anidada.
-
-Las tareas se mantienen temporalmente durante la ejecución de la aplicación, sin persistencia permanente.
-
-En los próximos módulos se incorporarán Redux Toolkit y Firebase para la gestión global y persistencia de datos.
-
-## Repositorio
-
-https://github.com/rafaelnogueira91/Proyecto-TaskFlow
-El archivo `.gitignore` excluye `node_modules` y `.expo`. Sube los archivos fuente, `package.json`, el archivo de bloqueo que genere `npm install` y este README.
+Este checkpoint cubre autenticación, rutas protegidas, persistencia y sincronización de tareas. **ImagePicker, Firebase Storage y fotografía de perfil** se reservan para la entrega final, según el enunciado de Coderhouse.
