@@ -1,93 +1,177 @@
-# TaskFlow — Módulo 7 | Autenticación y Persistencia
+# TaskFlow — Entrega Final | Módulo 8
 
-**Coderhouse · Checkpoint: Autenticación y Persistencia**
+**Aplicación de gestión de tareas desarrollada con React Native, Expo, Redux Toolkit y Firebase.**
 
-TaskFlow es una aplicación de gestión de tareas creada con **React Native y Expo**. Usa **Firebase Authentication** para registrar usuarios e iniciar sesión, **Cloud Firestore** para conservar las tareas y **Redux Toolkit** para mantener sincronizada la interfaz.
+**Repositorio:** https://github.com/rafaelnogueira91/Proyecto-TaskFlow
 
-Repositorio del proyecto: https://github.com/rafaelnogueira91/Proyecto-TaskFlow
+## 1. Descripción del proyecto
 
-## Tecnologías
+TaskFlow permite organizar actividades personales, laborales y académicas mediante una aplicación con autenticación de usuarios, tareas almacenadas en la nube y un perfil personalizable. El proyecto reúne las funcionalidades desarrolladas durante los módulos del programa y cuenta con pruebas de funcionamiento en Android y web.
 
-- React Native + Expo (web y dispositivos compatibles)
-- React Navigation: Stack Navigator y Bottom Tabs
-- Redux Toolkit + React Redux
-- Firebase Authentication (correo y contraseña)
-- Cloud Firestore
+## 2. Tecnologías utilizadas
 
-## Instalación y ejecución
+| Tecnología | Uso en TaskFlow |
+|---|---|
+| React Native y JavaScript | Desarrollo de la aplicación |
+| Expo | Ejecución en Android y web |
+| React Navigation | Navegación Stack y Bottom Tabs |
+| Redux Toolkit y React Redux | Estado global de tareas |
+| Firebase Authentication | Registro, inicio y cierre de sesión |
+| Cloud Firestore | Almacenamiento de tareas por usuario |
+| `onSnapshot` | Actualización de tareas desde Firestore |
+| AsyncStorage | Persistencia local de autenticación y avatar |
+| Expo ImagePicker | Selección de fotografía de perfil |
+| Git y GitHub | Control de versiones y entrega |
 
-1. Instalar **Node.js** y descargar o clonar este proyecto.
-2. Abrir una terminal en la carpeta que contiene `package.json`.
-3. Ejecutar `npm install`.
-4. Ejecutar `npx expo start --web` para probar en navegador, o `npx expo start` para seleccionar un destino compatible.
-5. Tener habilitados en el proyecto Firebase **Authentication > Sign-in method > Email/Password** y **Firestore Database**, con reglas de acceso por usuario.
+## 3. Funcionalidades
 
-> La configuración de Firebase está en `src/services/firebaseConfig.js`. Para utilizar otro proyecto Firebase, se deben reemplazar sus datos de configuración y configurar sus servicios y reglas. No subir cuentas de servicio ni credenciales administrativas al repositorio.
+### Autenticación
 
-## Funcionalidades del Módulo 7
+- Registro e inicio de sesión con correo electrónico y contraseña.
+- Validación de credenciales y manejo de errores de autenticación.
+- Rutas privadas condicionadas al usuario autenticado.
+- Cierre de sesión y recuperación del estado de autenticación con `onAuthStateChanged`.
+- Configuración de persistencia nativa mediante `initializeAuth`, `getReactNativePersistence` y AsyncStorage.
 
-### Autenticación y navegación protegida
+### Gestión de tareas
 
-- `LoginScreen.js`: inicio de sesión mediante `signInWithEmailAndPassword`, validaciones y mensajes de error.
-- `RegisterScreen.js`: registro mediante `createUserWithEmailAndPassword`.
-- `App.js`: escucha `onAuthStateChanged`, muestra un indicador de carga mientras determina la sesión y alterna entre rutas públicas (`Login`, `Registro`) y privadas (`Inicio`, `AgregarTarea`, `DetalleTarea`).
-- `ProfileScreen.js`: muestra información de la cuenta y permite cerrar sesión.
+- Crear tareas con título, descripción y categoría.
+- Consultar la lista y el detalle de cada tarea.
+- Marcar tareas como completadas o pendientes y eliminarlas.
+- Filtrar por categoría y estado.
+- Consultar contadores de tareas totales, pendientes y completadas.
+- Almacenar tareas en Firestore asociadas al campo `userId`.
+- Actualizar el estado de Redux mediante un listener `onSnapshot` de Firestore.
 
-### Tareas persistidas en Firestore
+### Perfil
 
-- Colección: **`tasks`**.
-- Cada documento de tarea contiene `userId`, `title`, `description`, `category`, `completed` y `createdAt`.
-- **Crear:** `addDoc` guarda una tarea vinculada al `uid` autenticado.
-- **Leer:** `getDocs` y `where('userId', '==', uid)` consultan las tareas del usuario.
-- **Actualizar:** `updateDoc` cambia el estado completada/pendiente.
-- **Eliminar:** `deleteDoc` elimina el documento correspondiente.
-- `taskSlice.js` implementa estas operaciones con `createAsyncThunk`, almacena los resultados en Redux y ofrece selectores para lista, detalle, filtros y contadores.
-- Se muestra un estado de carga y un mensaje de error con opción de reintentar la consulta cuando corresponde.
+- Consultar datos de la cuenta y estado de la sesión.
+- Seleccionar una fotografía desde la galería con Expo ImagePicker.
+- Mostrar el avatar seleccionado y conservarlo localmente con AsyncStorage.
+- Cerrar sesión desde la pantalla de perfil.
 
-**Sincronización:** la aplicación utiliza lectura al ingresar a la pantalla y después de operaciones de escritura; **no utiliza un listener `onSnapshot` en tiempo real**. Este enfoque está permitido por el enunciado del checkpoint.
+**Alcance del avatar:** se guarda en el dispositivo o navegador donde se seleccionó; no se sincroniza entre dispositivos mediante Firebase Storage.
 
-## Organización principal
+## 4. Organización del proyecto
 
 ```text
-App.js
-src/
-  components/         Componentes reutilizables
-  constants/          Colores de interfaz
-  screens/            Login, registro, tareas, detalle y perfil
-  services/
-    firebaseConfig.js Configuración y exportación de auth y db
-  store/
-    store.js          Configuración de Redux
-    taskSlice.js      Operaciones Firestore, reducers y selectores
+taskflow-app/
+├── App.js
+├── app.json
+├── package.json
+├── README.md
+├── firestore.rules.example
+├── assets/
+├── docs/
+│   └── evidencias/
+│       ├── 01-login.png
+│       ├── 02-registro.png
+│       ├── 03-tareas.png
+│       └── 04-perfil.png
+└── src/
+    ├── components/
+    ├── constants/
+    ├── screens/
+    ├── services/
+    │   └── firebaseConfig.js
+    └── store/
 ```
 
-## Cómo probar el checkpoint
+`App.js` integra autenticación, navegación y escucha de Firestore. `src/store/` contiene el estado global; `src/screens/` contiene las pantallas y `src/services/firebaseConfig.js` centraliza la inicialización de Firebase.
 
-Las siguientes son **instrucciones de prueba manual**, no un registro de pruebas automatizadas. Marca los resultados una vez ejecutados en tu entorno y en la consola Firebase.
+## 5. Instalación y ejecución
 
-| Prueba | Pasos | Resultado esperado |
-|---|---|---|
-| Registro | Cerrar sesión, entrar a Registro y crear una cuenta nueva | Firebase crea la cuenta y se muestra el flujo privado |
-| Inicio de sesión | Cerrar sesión e ingresar con credenciales válidas | Se abre Inicio / Mis tareas |
-| Error de autenticación | Intentar ingresar con contraseña incorrecta | Se presenta un mensaje claro, sin cerrar la app |
-| Sesión persistente | Iniciar sesión, cerrar y volver a abrir la app en el mismo entorno | Se recupera la sesión si el entorno conserva el almacenamiento de Firebase |
-| Crear tarea | Crear una tarea válida | Aparece en la lista y en Firebase Console > Firestore Database > `tasks` |
-| Completar tarea | Cambiar el estado de una tarea | Cambia en la interfaz y en el documento de Firestore |
-| Eliminar tarea | Eliminar una tarea | Desaparece de la lista y de Firestore |
-| Aislamiento de usuarios | Crear tarea con cuenta A, cerrar sesión e ingresar con cuenta B | B no ve las tareas de A |
-| Persistencia de datos | Crear una tarea, cerrar sesión y volver a ingresar con la misma cuenta | La tarea vuelve a cargarse desde Firestore |
-| Fallo de red | Desconectar la red e intentar consultar o guardar | Se informa el error sin que la app se cierre |
+**Requisitos:** Node.js, npm, un proyecto Firebase con Authentication (Email/Password) y Firestore habilitados, y Expo Go compatible con la versión SDK instalada en el proyecto.
 
-### Evidencias recomendadas para la entrega
+Clonar el repositorio:
 
-Capturas del registro/login, de la lista de tareas, del documento creado en la colección `tasks` (mostrando `userId`) y de la prueba con dos cuentas. **No incluir contraseñas ni tokens** en capturas.
+```bash
+git clone https://github.com/rafaelnogueira91/Proyecto-TaskFlow.git
+cd Proyecto-TaskFlow
+```
 
-## Seguridad de Firestore
+Si `package.json` se encuentra en una subcarpeta, ingresar primero a esa carpeta.
 
-Filtrar por `userId` en el cliente **no sustituye las reglas de seguridad**. La consola Firebase debe tener reglas que permitan a cada usuario leer y escribir solo sus propios documentos. El archivo `firestore.rules.example` incluye un ejemplo para revisar y adaptar en Firebase Console > Firestore Database > Rules.
+Instalar dependencias e iniciar Expo:
 
-**Importante:** el archivo de ejemplo no aplica reglas automáticamente ni prueba que las reglas de producción estén activas. Deben revisarse y publicarse en Firebase.
+```bash
+npm install
+npx expo start
+```
 
-## Alcance y próximo paso
+Para abrir en el navegador:
 
-Este checkpoint cubre autenticación, rutas protegidas, persistencia y sincronización de tareas. **ImagePicker, Firebase Storage y fotografía de perfil** se reservan para la entrega final, según el enunciado de Coderhouse.
+```bash
+npx expo start --web
+```
+
+Para abrir en Android, iniciar Expo Go y escanear el código QR que muestra la terminal. El teléfono y el computador deben poder comunicarse por red. Como alternativa de conexión:
+
+```bash
+npx expo start --tunnel
+```
+
+Para limpiar la caché de Expo:
+
+```bash
+npx expo start -c
+```
+
+La configuración de Firebase se encuentra en `src/services/firebaseConfig.js`. Para usar otro proyecto Firebase, configurar sus valores y habilitar los servicios necesarios. **No incluir contraseñas, cuentas de servicio, claves privadas ni archivos `.env` con secretos en el repositorio.**
+
+## 6. Seguridad de Firestore
+
+El proyecto incluye reglas de referencia en `firestore.rules.example` para restringir el acceso a documentos de la colección `tasks` según el usuario autenticado.
+
+| Operación | Condición |
+|---|---|
+| Crear | `request.resource.data.userId == request.auth.uid` |
+| Leer y eliminar | `resource.data.userId == request.auth.uid` |
+| Actualizar | El usuario es propietario y el `userId` no cambia |
+
+Las reglas deben publicarse y verificarse en **Firebase Console → Firestore Database → Reglas**. El archivo del repositorio, por sí solo, no activa las reglas en el servidor.
+
+## 7. Pruebas de funcionamiento
+
+Durante el desarrollo se observó el funcionamiento de TaskFlow en navegador web y Android mediante Expo Go. Se comprobó la visualización de tareas, el cambio de estado a completada, la actualización de contadores y la recuperación de tareas almacenadas en Firestore al volver a iniciar sesión. También se comprobó la selección y conservación local del avatar en el navegador.
+
+Las funcionalidades de persistencia nativa, permisos, aislamiento entre usuarios y comportamiento sin conexión deben validarse en el entorno correspondiente antes de una distribución de producción. No se documentan pruebas de iOS.
+
+## 8. Evidencias visuales
+
+Las siguientes capturas corresponden a las pantallas reales de TaskFlow utilizadas durante el desarrollo.
+
+### Inicio de sesión
+
+![Inicio de sesión de TaskFlow](docs/evidencias/01-login.png)
+
+### Registro de usuario
+
+![Registro de usuario de TaskFlow](docs/evidencias/02-registro.png)
+
+### Gestión de tareas
+
+![Lista de tareas, filtros y contadores](docs/evidencias/03-tareas.png)
+
+### Perfil de usuario
+
+![Perfil con avatar seleccionado](docs/evidencias/04-perfil.png)
+
+## 9. Repositorio y ejecución compartida
+
+**Código fuente:** https://github.com/rafaelnogueira91/Proyecto-TaskFlow
+
+**Nombre de la aplicación:** TaskFlow  
+**Slug de Expo:** `taskflow-app`  
+**Plataformas probadas:** Android y web
+
+Para ejecutar el proyecto durante el desarrollo se utiliza Expo Go con `npx expo start`. Un servidor local de desarrollo no equivale a una publicación permanente. El enlace público de Expo/EAS se agregará cuando se genere una publicación o build compartible.
+
+## 10. Conclusión
+
+TaskFlow integra los conocimientos adquiridos en React Native y Expo: componentes reutilizables, navegación, gestión de estado con Redux Toolkit, autenticación con Firebase, almacenamiento en Firestore y selección de imágenes mediante Expo ImagePicker. Las pruebas realizadas en Android y web muestran el funcionamiento de los flujos principales de gestión de tareas y perfil.
+
+---
+
+**TaskFlow — Entrega Final del Módulo 8**  
+*React Native · Expo · Redux Toolkit · Firebase*

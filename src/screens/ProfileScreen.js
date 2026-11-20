@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   View,
@@ -8,14 +8,19 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from 'react-native';
 
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [avatar, setAvatar] = useState(null);
+  const [choosingPhoto, setChoosingPhoto] = useState(false);
 
   // Usuario autenticado en Firebase
   const user = auth.currentUser;
@@ -27,8 +32,49 @@ export default function ProfileScreen() {
     user?.email?.split('@')[0] ||
     'Usuario';
 
-  // Iniciales del avatar acordadas
-  const initials = 'RA';
+  const initials = name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
+  const avatarKey = user ? `taskflow:avatar:${user.uid}` : null;
+
+  useEffect(() => {
+    let active = true;
+    setAvatar(null);
+    if (avatarKey) {
+      AsyncStorage.getItem(avatarKey)
+        .then(value => { if (active) setAvatar(value); })
+        .catch(() => { if (active) setError('No se pudo recuperar la foto.'); });
+    }
+    return () => { active = false; };
+  }, [avatarKey]);
+
+  const choosePhoto = async () => {
+    if (choosingPhoto || !avatarKey) return;
+    setChoosingPhoto(true);
+    setError('');
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setError('Debes permitir el acceso a las fotos para seleccionar una imagen.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.35,
+        base64: true,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      const asset = result.assets[0];
+      if (!asset.base64) throw new Error('No se pudo leer la imagen.');
+      const uri = `data:image/jpeg;base64,${asset.base64}`;
+      await AsyncStorage.setItem(avatarKey, uri);
+      setAvatar(uri);
+    } catch (_) {
+      setError('No se pudo guardar la foto. Prueba con una imagen más pequeña.');
+    } finally {
+      setChoosingPhoto(false);
+    }
+  };
 
   // Cerrar sesión
   const logout = async () => {
@@ -66,10 +112,18 @@ export default function ProfileScreen() {
 
           {/* Avatar */}
           <View style={styles.avatar}>
-            <Text style={styles.initials}>
-              {initials}
-            </Text>
+            {avatar ? (
+              <Image source={{ uri: avatar }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.initials}>{initials}</Text>
+            )}
           </View>
+          <TouchableOpacity onPress={choosePhoto} disabled={choosingPhoto}
+            accessibilityRole="button" style={styles.photoButton}>
+            <Text style={styles.photoButtonText}>
+              {choosingPhoto ? 'Seleccionando...' : 'Cambiar foto de perfil'}
+            </Text>
+          </TouchableOpacity>
 
           {/* Nombre del usuario */}
           <Text style={styles.name}>
@@ -193,7 +247,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  // Iniciales RA centradas
+  avatarImage: { width: 90, height: 90, borderRadius: 45 },
+  photoButton: { padding: 10, marginBottom: 12 },
+  photoButtonText: { color: '#4A90E2', fontWeight: '600', textAlign: 'center' },
+
+  // Iniciales centradas
   initials: {
     fontSize: 26,
     fontWeight: '700',

@@ -23,13 +23,15 @@ import {
 
 import { StatusBar } from 'expo-status-bar';
 import { onAuthStateChanged } from 'firebase/auth';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
 import { store } from './src/store/store';
-import { auth } from './src/services/firebaseConfig';
+import { auth, db } from './src/services/firebaseConfig';
 
 import {
   clearTasks,
-  fetchTasks,
+  setTasksFromSnapshot,
+  setTasksListenerError,
 } from './src/store/taskSlice';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -77,25 +79,36 @@ function Navigation() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      currentUser => {
-        // Limpiar datos del usuario anterior
-        store.dispatch(clearTasks());
-
-        // Actualizar usuario autenticado
-        setUser(currentUser);
-
-        // Cargar tareas del usuario actual
-        if (currentUser) {
-          store.dispatch(fetchTasks());
-        }
-
-        setLoading(false);
+    let unsubscribeTasks = null;
+    const unsubscribeAuth = onAuthStateChanged(auth, currentUser => {
+      if (unsubscribeTasks) {
+        unsubscribeTasks();
+        unsubscribeTasks = null;
       }
-    );
-
-    return unsubscribe;
+      store.dispatch(clearTasks());
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        const uid = currentUser.uid;
+        const tasksQuery = query(collection(db, 'tasks'), where('userId', '==', uid));
+        unsubscribeTasks = onSnapshot(tasksQuery, snapshot => {
+          const items = snapshot.docs.map(item => ({
+            ...item.data(),
+            id: item.id,
+            createdAt: item.data().createdAt?.toMillis?.() ?? null,
+          }));
+          store.dispatch(setTasksFromSnapshot({ userId: uid, items }));
+        }, () => {
+          if (auth.currentUser?.uid === uid) {
+            store.dispatch(setTasksListenerError('No se pudieron sincronizar las tareas. Revisa tu conexión.'));
+          }
+        });
+      }
+    });
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeTasks) unsubscribeTasks();
+    };
   }, []);
 
   // Esperar la verificación de sesión

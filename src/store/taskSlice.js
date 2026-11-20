@@ -189,6 +189,18 @@ const taskSlice = createSlice({
       };
     },
 
+    setTasksFromSnapshot(state, action) {
+      if (auth.currentUser?.uid !== action.payload.userId) return;
+      state.userId = action.payload.userId;
+      state.items = action.payload.items;
+      state.loading = false;
+      state.error = null;
+      state.activeRequestId = null;
+    },
+    setTasksListenerError(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
     clearTasks(state) {
       state.items = [];
       state.userId = null;
@@ -282,6 +294,8 @@ export const {
   setCategoryFilter,
   clearFilters,
   clearTasks,
+  setTasksFromSnapshot,
+  setTasksListenerError,
 } = taskSlice.actions;
 
 // Selectores
